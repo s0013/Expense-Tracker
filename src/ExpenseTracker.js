@@ -1,190 +1,210 @@
 import React, { useState, useEffect } from 'react';
 
 const ExpenseTracker = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [text, setText] = useState('');
-  const [amount, setAmount] = useState('');
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [expense, setExpense] = useState(0);
+  // State to store expenses for each month
+  const [expenses, setExpenses] = useState({});
+  // State to store total income for each month
+  const [income, setIncome] = useState({});
+  // State to store selected month
+  const [selectedMonth, setSelectedMonth] = useState('');
+  // State to store salary for the selected month
+  const [salary, setSalary] = useState(0);
+  // State to store remaining balance for the selected month
   const [remainingBalance, setRemainingBalance] = useState(0);
-  const [editTransactionId, setEditTransactionId] = useState(null);
+  // State to store expense details
+  const [expenseDetails, setExpenseDetails] = useState({
+    date: '',
+    name: '',
+    amount: 0
+  });
+  // State to track the index of the expense being edited
+  const [editIndex, setEditIndex] = useState(null);
 
+  // Load expenses and income from local storage on component mount
   useEffect(() => {
-    const storedTransactions = JSON.parse(localStorage.getItem('transactions'));
-    const storedTotalIncome = JSON.parse(localStorage.getItem('totalIncome'));
-
-    if (storedTransactions) {
-      setTransactions(storedTransactions);
-    }
-
-    if (storedTotalIncome !== null) {
-      setTotalIncome(storedTotalIncome);
-    } else {
-      setTotalIncome(0); // Prompt user to input total income again
-    }
+    const storedExpenses = JSON.parse(localStorage.getItem('expenses')) || {};
+    const storedIncome = JSON.parse(localStorage.getItem('income')) || {};
+    setExpenses(storedExpenses);
+    setIncome(storedIncome);
   }, []);
 
+  // Update remaining balance whenever expenses or income change
   useEffect(() => {
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    localStorage.setItem('totalIncome', JSON.stringify(totalIncome));
-    calculateRemainingBalance();
-  }, [transactions, totalIncome]);
-
-  const addTransaction = (e) => {
-    e.preventDefault();
-    if (text.trim() === '' || amount.trim() === '') return;
-  
-    if (editTransactionId !== null) {
-      // Edit mode
-      const updatedTransactions = transactions.map(transaction =>
-        transaction.id === editTransactionId
-          ? { ...transaction, text, amount: +amount }
-          : transaction
-      );
-      setTransactions(updatedTransactions);
-      setEditTransactionId(null); // Exit edit mode
-  
-      // Recalculate total expense after editing
-      const updatedExpense = updatedTransactions.reduce((acc, transaction) => acc + transaction.amount, 0);
-      setExpense(updatedExpense);
-    } else {
-      // Add mode
-      const newTransaction = {
-        id: Math.floor(Math.random() * 1000000),
-        text,
-        amount: +amount
-      };
-      setTransactions([...transactions, newTransaction]);
-      setExpense(expense + Number(amount));
+    if (selectedMonth && income[selectedMonth] !== undefined) {
+      const totalExpenses = calculateTotalExpenses(expenses[selectedMonth]);
+      const remaining = income[selectedMonth] - totalExpenses;
+      setRemainingBalance(remaining);
     }
-  
-    setText('');
-    setAmount('');
-  };
-  
-  const editTransaction = (id) => {
-    const transactionToEdit = transactions.find(transaction => transaction.id === id);
-    if (transactionToEdit) {
-      setText(transactionToEdit.text);
-      setAmount(transactionToEdit.amount.toString());
-      setEditTransactionId(id);
-    }
+  }, [expenses, income, selectedMonth]);
+
+  // Function to add expense for a specific month
+  const addExpense = () => {
+    const expense = { ...expenseDetails };
+    const updatedExpenses = { ...expenses, [selectedMonth]: [...(expenses[selectedMonth] || []), expense] };
+    setExpenses(updatedExpenses);
+    // Update local storage
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    // Reset expense details
+    setExpenseDetails({
+      date: '',
+      name: '',
+      amount: 0
+    });
   };
 
-  const deleteTransaction = (id) => {
-    const updatedTransactions = transactions.filter(transaction => transaction.id !== id);
-    setTransactions(updatedTransactions);
-    // Recalculate expense after deleting the transaction
-    const updatedExpense = updatedTransactions.reduce((acc, curr) => acc + curr.amount, 0);
-    setExpense(updatedExpense);
+  // Function to handle adding income for a specific month
+  const handleAddIncome = () => {
+    const updatedIncome = { ...income, [selectedMonth]: salary };
+    setIncome(updatedIncome);
+    // Update local storage
+    localStorage.setItem('income', JSON.stringify(updatedIncome));
   };
 
-  const calculateRemainingBalance = () => {
-    const remaining = totalIncome - expense;
-    setRemainingBalance(remaining);
+  // Function to calculate the total expense amount for a given list of expenses
+  const calculateTotalExpenses = (expenses) => {
+    if (!expenses || expenses.length === 0) return 0;
+    return expenses.reduce((total, exp) => total + exp.amount, 0);
   };
 
-  const handleTotalIncomeSubmit = (e) => {
-    e.preventDefault();
-    setTotalIncome(Number(amount));
-    setRemainingBalance(Number(amount));
-    setAmount('');
+  // Function to handle editing an expense
+  const handleEditExpense = (index) => {
+    setEditIndex(index);
+    const expenseToEdit = expenses[selectedMonth][index];
+    setExpenseDetails({ ...expenseToEdit });
   };
+
+  // Function to handle deleting an expense
+  const handleDeleteExpense = (index) => {
+    const updatedExpenses = [...expenses[selectedMonth]];
+    updatedExpenses.splice(index, 1);
+    const updatedExpenseObj = { ...expenses, [selectedMonth]: updatedExpenses };
+    setExpenses(updatedExpenseObj);
+    // Update local storage
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenseObj));
+  };
+
+  // Function to save the edited expense
+  const saveEditedExpense = () => {
+    const updatedExpenses = [...expenses[selectedMonth]];
+    updatedExpenses[editIndex] = { ...expenseDetails };
+    const updatedExpenseObj = { ...expenses, [selectedMonth]: updatedExpenses };
+    setExpenses(updatedExpenseObj);
+    // Update local storage
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenseObj));
+    // Reset edit state
+    setEditIndex(null);
+    setExpenseDetails({
+      date: '',
+      name: '',
+      amount: 0
+    });
+  };
+
+  // Render expenses for the selected month
+  const renderExpenses = () => {
+    const monthExpenses = expenses[selectedMonth] || [];
+    const totalExpenses = calculateTotalExpenses(monthExpenses);
+
+    return (
+      <div className="card">
+        <div className="card-body">
+          <h3 className="card-title text-black">Expenses for {selectedMonth}</h3>
+          <h4 className="card-subtitle mb-2 text-muted">Total Expense Amount: ${totalExpenses}</h4>
+          <h4 className="card-subtitle mb-2 text-muted">Remaining Balance: ${remainingBalance}</h4>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Expense Name</th>
+                <th>Amount</th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthExpenses.map((expense, index) => (
+                <tr key={index}>
+                  <td>{expense.date}</td>
+                  <td>
+                    {editIndex === index ? (
+                      <input
+                        type="text"
+                        value={expenseDetails.name}
+                        onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })}
+                        className="form-control"
+                      />
+                    ) : (
+                      expense.name
+                    )}
+                  </td>
+                  <td>
+                    {editIndex === index ? (
+                      <input
+                        type="number"
+                        value={expenseDetails.amount}
+                        onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })}
+                        className="form-control"
+                      />
+                    ) : (
+                      `$${expense.amount}`
+                    )}
+                  </td>
+                  <td>
+                    {editIndex === index ? (
+                      <button onClick={saveEditedExpense} className="btn btn-primary">Save</button>
+                    ) : (
+                      <button onClick={() => handleEditExpense(index)} className="btn btn-warning">Edit</button>
+                    )}
+                  </td>
+                  <td><button onClick={() => handleDeleteExpense(index)} className="btn btn-danger">Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="container mt-5" style={{
-        height: '92vh'
-      }}>
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="border p-4">
-            <h2>Expense Tracker</h2>
-            {totalIncome === 0 && (
-              <div className="row mb-4">
-                <div className="col">
-                  <form onSubmit={handleTotalIncomeSubmit}>
-                    <label htmlFor="income" className="form-label">Enter Total Income:</label>
-                    <input type="number" id="income" value={amount} onChange={(e) => setAmount(e.target.value)} className="form-control mb-3" />
-                    <button type="submit" className="btn btn-primary">Add</button>
-                  </form>
-                </div>
-              </div>
-            )}
-            {totalIncome > 0 && (
-              <div>
-               <div className="row mb-4">
-  <div className="col">
-    <div className="card mb-3">
-      <div className="card-body">
-        <h5 className="card-title" style={{ color: 'black' }}>Total Income</h5>
-        <p className="card-text" style={{ color: 'black' }}>${totalIncome}</p>
-      </div>
-    </div>
-  </div>
-  <div className="col">
-    <div className="card mb-3">
-      <div className="card-body">
-        <h5 className="card-title" style={{ color: 'black' }}>Total Expense</h5>
-        <p className="card-text" style={{ color: 'black' }}>${expense}</p>
-      </div>
-    </div>
-  </div>
-  <div className="w-100"></div> {/* Add a line break on small devices */}
-  <div className="col">
-    <div className="card">
-      <div className="card-body">
-        <h5 className="card-title" style={{ color: 'black' }}>Remaining Balance</h5>
-        <p className="card-text" style={{ color: 'black' }}>${remainingBalance}</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-                <div className="row">
-                  <div className="col">
-                    <form onSubmit={addTransaction}>
-                      <div className="mb-3">
-                        <label htmlFor="text" className="form-label">Transaction Description:</label>
-                        <input type="text" value={text} onChange={(e) => setText(e.target.value)} className="form-control" />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="amount" className="form-label">Transaction Amount:</label>
-                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="form-control" />
-                      </div>
-                      <button type="submit" className="btn btn-primary">{editTransactionId !== null ? 'Edit Transaction' : 'Add Transaction'}</button>
-                    </form>
-                  </div>
-                  <div className="col">
-                    <div>
-                      <h3 className="mt-4">Transactions</h3>
-                      <ul className="list-group">
-                        {transactions.map(transaction => (
-                          <li key={transaction.id} className="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                              {transaction.text} (${transaction.amount})
-                            </div>
-                            <div className="col">
-                             <div className="d-flex justify-content-end">
-                              <button className="btn btn-warning btn-sm me-2" onClick={() => editTransaction(transaction.id)}>Edit</button>
-                              <button className="btn btn-danger btn-sm" onClick={() => deleteTransaction(transaction.id)}>Delete</button>
-                             </div>
-                            </div>
-
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+    <div className="container mt-4">
+      <h2 className="mb-4">Expense Tracker</h2>
+      <div className="row">
+        <div className="col-md-6">
+          <div className="card mb-4">
+            <div className="card-body">
+              <h3 className="card-title text-black">Select Month and Add Income</h3>
+              <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="form-select mb-3">
+                <option value="">Select Month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                {/* Add options for other months */}
+              </select>
+              <input type="number" value={salary} onChange={(e) => setSalary(parseFloat(e.target.value))} className="form-control mb-3" />
+              <button onClick={handleAddIncome} className="btn btn-success">Add Income</button>
+            </div>
           </div>
+        </div>
+        <div className="col-md-6">
+          {selectedMonth && (
+            <div className="card mb-4">
+              <div className="card-body">
+                <h3 className="card-title text-black">Total Income: ${income[selectedMonth] || 0}</h3>
+                <div className="mb-3">
+                  <h3 className="card-title text-black">Add Expense</h3>
+                  <input type="date" value={expenseDetails.date} onChange={(e) => setExpenseDetails({ ...expenseDetails, date: e.target.value })} className="form-control mb-2" />
+                  <input type="text" value={expenseDetails.name} onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })} className="form-control mb-2" />
+                  <input type="number" value={expenseDetails.amount} onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })} className="form-control mb-2" />
+                  <button onClick={addExpense} className="btn btn-primary">Add Expense</button>
+                </div>
+                {renderExpenses()}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-  
-  
 };
 
 export default ExpenseTracker;
