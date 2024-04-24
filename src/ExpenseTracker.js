@@ -191,7 +191,7 @@ useEffect(() => {
                 <option value="October">October</option>
                 <option value="November">November</option>
                 <option value="December">December</option>
-                
+
               </select>
               <input type="number" value={salary} onChange={(e) => setSalary(parseFloat(e.target.value))} className="form-control mb-3" />
               <button onClick={handleAddIncome} className="btn btn-success">Add Income</button>
@@ -204,12 +204,17 @@ useEffect(() => {
               <div className="card-body">
                 <h3 className="card-title text-black">Total Income: ${income[selectedMonth] || 0}</h3>
                 <div className="mb-3">
-                  <h3 className="card-title text-black">Add Expense</h3>
-                  <input type="date" value={expenseDetails.date} onChange={(e) => setExpenseDetails({ ...expenseDetails, date: e.target.value })} className="form-control mb-2" />
-                  <input type="text" value={expenseDetails.name} onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })} className="form-control mb-2" />
-                  <input type="number" value={expenseDetails.amount} onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })} className="form-control mb-2" />
-                  <button onClick={addExpense} className="btn btn-primary">Add Expense</button>
-                </div>
+  <h3 className="card-title text-black">Add Expense</h3>
+  <label htmlFor="expenseDate" className="form-label  text-black">Date:</label>
+  <input type="date" id="expenseDate" value={expenseDetails.date} onChange={(e) => setExpenseDetails({ ...expenseDetails, date: e.target.value })} className="form-control mb-2" />
+  <label htmlFor="expenseName" className="form-label  text-black">Name Of Expense:</label>
+  <input type="text" id="expenseName" value={expenseDetails.name} onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })} className="form-control mb-2" />
+  <label htmlFor="expenseAmount" className="form-label  text-black">Amount:</label>
+  <input type="number" id="expenseAmount" value={expenseDetails.amount} onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })} className="form-control mb-2" />
+  <button onClick={addExpense} className="btn btn-primary">Add Expense</button>
+</div>
+
+
                 {renderExpenses()}
               </div>
             </div>
