@@ -91,7 +91,9 @@ const ExpenseTracker = () => {
     setAmount('');
   };
   return (
-    <div className="container mt-5">
+    <div className="container mt-5" style={{
+        height: '92vh'
+      }}>
       <div className="row justify-content-center">
         <div className="col-md-8">
           <div className="border p-4">
@@ -109,32 +111,35 @@ const ExpenseTracker = () => {
             )}
             {totalIncome > 0 && (
               <div>
-                <div className="row mb-4">
-                  <div className="col">
-                    <div className="card">
-                      <div className="card-body">
-                        <h5 className="card-title">Total Income</h5>
-                        <p className="card-text">${totalIncome}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col">
-                    <div className="card">
-                      <div className="card-body">
-                        <h5 className="card-title">Total Expense</h5>
-                        <p className="card-text">${expense}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col">
-                    <div className="card">
-                      <div className="card-body">
-                        <h5 className="card-title">Remaining Balance</h5>
-                        <p className="card-text">${remainingBalance}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+               <div className="row mb-4">
+  <div className="col">
+    <div className="card mb-3">
+      <div className="card-body">
+        <h5 className="card-title" style={{ color: 'black' }}>Total Income</h5>
+        <p className="card-text" style={{ color: 'black' }}>${totalIncome}</p>
+      </div>
+    </div>
+  </div>
+  <div className="col">
+    <div className="card mb-3">
+      <div className="card-body">
+        <h5 className="card-title" style={{ color: 'black' }}>Total Expense</h5>
+        <p className="card-text" style={{ color: 'black' }}>${expense}</p>
+      </div>
+    </div>
+  </div>
+  <div className="w-100"></div> {/* Add a line break on small devices */}
+  <div className="col">
+    <div className="card">
+      <div className="card-body">
+        <h5 className="card-title" style={{ color: 'black' }}>Remaining Balance</h5>
+        <p className="card-text" style={{ color: 'black' }}>${remainingBalance}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
                 <div className="row">
                   <div className="col">
                     <form onSubmit={addTransaction}>

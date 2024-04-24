@@ -5,9 +5,24 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+ 
+    background-image: url('https://img.freepik.com/free-photo/top-view-desk-concept-with-notepad_23-2148604955.jpg?size=626&ext=jpg&ga=GA1.1.1224184972.1713830400&semt=ais');
+    background-size: cover; /* This will ensure the background image covers the entire container */
+    background-repeat: no-repeat; /* Prevent the background image from repeating */
+    background-position: center;
+    color: white; /* Change text color to white for better visibility */
+    background-color: rgb(24, 24, 24)
+   
+  
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@media (max-width: 432px) {
+  body {
+    background-size: 225vh auto; /* Set width to 100vh for devices with a width of 432px or less */
+  }
 }
