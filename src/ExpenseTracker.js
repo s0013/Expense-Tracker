@@ -20,14 +20,17 @@ const ExpenseTracker = () => {
   // State to track the index of the expense being edited
   const [editIndex, setEditIndex] = useState(null);
 
-  // Load expenses and income from local storage on component mount
-  useEffect(() => {
-    const storedExpenses = JSON.parse(localStorage.getItem('expenses')) || {};
-    const storedIncome = JSON.parse(localStorage.getItem('income')) || {};
-    setExpenses(storedExpenses);
-    setIncome(storedIncome);
-  }, []);
-
+  // Update remaining balance whenever expenses or income change, or when the selected month changes
+useEffect(() => {
+    if (selectedMonth && income[selectedMonth] !== undefined) {
+      const totalExpenses = calculateTotalExpenses(expenses[selectedMonth]);
+      const remaining = income[selectedMonth] - totalExpenses;
+      setRemainingBalance(remaining);
+    } else {
+      setRemainingBalance(0); // Set remaining balance to 0 if no income is set for the selected month
+  }
+  }, [expenses, income, selectedMonth]);
+  
   // Update remaining balance whenever expenses or income change
   useEffect(() => {
     if (selectedMonth && income[selectedMonth] !== undefined) {
@@ -178,7 +181,17 @@ const ExpenseTracker = () => {
                 <option value="">Select Month</option>
                 <option value="January">January</option>
                 <option value="February">February</option>
-                {/* Add options for other months */}
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+        
               </select>
               <input type="number" value={salary} onChange={(e) => setSalary(parseFloat(e.target.value))} className="form-control mb-3" />
               <button onClick={handleAddIncome} className="btn btn-success">Add Income</button>
