@@ -191,7 +191,7 @@ useEffect(() => {
                 <option value="October">October</option>
                 <option value="November">November</option>
                 <option value="December">December</option>
-        
+                
               </select>
               <input type="number" value={salary} onChange={(e) => setSalary(parseFloat(e.target.value))} className="form-control mb-3" />
               <button onClick={handleAddIncome} className="btn btn-success">Add Income</button>
