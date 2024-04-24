@@ -114,56 +114,65 @@ useEffect(() => {
           <h3 className="card-title text-black">Expenses for {selectedMonth}</h3>
           <h4 className="card-subtitle mb-2 text-muted">Total Expense Amount: ${totalExpenses}</h4>
           <h4 className="card-subtitle mb-2 text-muted">Remaining Balance: ${remainingBalance}</h4>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Expense Name</th>
-                <th>Amount</th>
-                <th>Edit</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthExpenses.map((expense, index) => (
-                <tr key={index}>
-                  <td>{expense.date}</td>
-                  <td>
-                    {editIndex === index ? (
-                      <input
-                        type="text"
-                        value={expenseDetails.name}
-                        onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })}
-                        className="form-control"
-                      />
-                    ) : (
-                      expense.name
-                    )}
-                  </td>
-                  <td>
-                    {editIndex === index ? (
-                      <input
-                        type="number"
-                        value={expenseDetails.amount}
-                        onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })}
-                        className="form-control"
-                      />
-                    ) : (
-                      `$${expense.amount}`
-                    )}
-                  </td>
-                  <td>
-                    {editIndex === index ? (
-                      <button onClick={saveEditedExpense} className="btn btn-primary">Save</button>
-                    ) : (
-                      <button onClick={() => handleEditExpense(index)} className="btn btn-warning">Edit</button>
-                    )}
-                  </td>
-                  <td><button onClick={() => handleDeleteExpense(index)} className="btn btn-danger">Delete</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-responsive">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Expense Name</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {monthExpenses.map((expense, index) => (
+        <tr key={index}>
+          <td>{expense.date}</td>
+          <td>
+            {editIndex === index ? (
+              <input
+                type="text"
+                value={expenseDetails.name}
+                onChange={(e) => setExpenseDetails({ ...expenseDetails, name: e.target.value })}
+                className="form-control"
+              />
+            ) : (
+              expense.name
+            )}
+          </td>
+          <td>
+            {editIndex === index ? (
+              <input
+                type="number"
+                value={expenseDetails.amount}
+                onChange={(e) => setExpenseDetails({ ...expenseDetails, amount: parseFloat(e.target.value) })}
+                className="form-control"
+              />
+            ) : (
+              `$${expense.amount}`
+            )}
+          </td>
+          <td>
+            <div className="btn-group" role="group" aria-label="Expense Actions">
+              {editIndex === index ? (
+                <>
+                  <button onClick={saveEditedExpense} className="btn btn-primary">Save</button>
+                  <button onClick={() => setEditIndex(null)} className="btn btn-secondary">Cancel</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => handleEditExpense(index)} className="btn btn-warning">Edit</button>
+                  <button onClick={() => handleDeleteExpense(index)} className="btn btn-danger">Delete</button>
+                </>
+              )}
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
         </div>
       </div>
     );
